@@ -1,3 +1,8 @@
+#include <fcntl.h>
+#include <libgen.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <unistd.h>
 #include "systemcalls.h"
 
 /**
@@ -10,13 +15,10 @@
 bool do_system(const char *cmd)
 {
 
-/*
- * TODO  add your code here
- *  Call the system() function with the command set in the cmd
- *   and return a boolean true if the system() call completed with success
- *   or false() if it returned a failure
-*/
+    int ret = system(cmd);
 
+    if(!WIFEXITED(ret) || WEXITSTATUS(ret))
+        return false;
     return true;
 }
 
@@ -59,6 +61,24 @@ bool do_exec(int count, ...)
  *
 */
 
+
+    pid_t pid;
+    pid = fork();
+    if(pid == -1)
+        return false;
+    if(pid == 0)
+    {
+        char * execfile = command[0];
+        command[0] = basename(execfile);
+        execv(execfile, command);
+        exit(-1);
+    }
+    int status;
+    if(waitpid(pid, &status, 0) == -1)
+        return false;
+    if(!WIFEXITED(status) || WEXITSTATUS(status))
+        return false;
+
     va_end(args);
 
     return true;
@@ -93,6 +113,28 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *
 */
 
+    pid_t pid;
+    pid = fork();
+    if(pid == -1)
+        return false;
+    if(pid == 0)
+    {
+        int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
+        if(fd < 0)
+            return false;
+        if(dup2(fd, 1) < 0)
+            return false;
+        close(fd);
+
+        char * execfile = command[0];
+        command[0] = basename(execfile);
+        execv(execfile, command);
+    }
+    int status;
+    if(waitpid(pid, &status, 0) == -1)
+        return false;
+    if(!WIFEXITED(status) || WEXITSTATUS(status))
+        return false;
     va_end(args);
 
     return true;
