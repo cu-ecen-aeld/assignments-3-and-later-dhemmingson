@@ -81,8 +81,8 @@ echo "Library dependencies"
 ${CROSS_COMPILE}readelf -a bin/busybox | grep "Shared library"
 
 # TODO: Add library dependencies to rootfs
-cp ${FINDER_APP_DIR}/lib/* lib
-cp ${FINDER_APP_DIR}/lib64/* lib64
+cp ${FINDER_APP_DIR}/ld-linux-aarch64.so.1 lib
+cp ${FINDER_APP_DIR}/libm.so.6 ${FINDER_APP_DIR}/libc.so.6 ${FINDER_APP_DIR}/libresolv.so.2 lib64
 
 # TODO: Make device nodes
 sudo mknod -m 666 dev/null c 1 3
