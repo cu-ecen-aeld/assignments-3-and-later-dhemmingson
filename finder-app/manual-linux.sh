@@ -96,6 +96,7 @@ make CROSS_COMPILE=${CROSS_COMPILE}
 # TODO: Copy the finder related scripts and executables to the /home directory
 # on the target rootfs
 cp -rL writer finder*.sh conf ${OUTDIR}/rootfs/home
+cp conf/username.txt conf/assignment.txt autorun-qemu.sh ${OUTDIR}/rootfs/home
 
 # TODO: Chown the root directory
 sudo chown -R root:root ${OUTDIR}/rootfs
